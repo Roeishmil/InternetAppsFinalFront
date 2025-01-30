@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { PostType } from './Post';
+import { PostType } from './components/Post';
 
 // Create axios instance with base configuration
 const api = axios.create({
@@ -19,18 +19,18 @@ export interface PostResponse extends PostType {
 export const postsApi = {
     getAll: async (): Promise<PostResponse[]> => {
         const response = await api.get('/posts');
-        return response.data;
+        return response.data as PostResponse[];
     },
     
     // You can add other post-related API methods here
     getById: async (id: string): Promise<PostResponse> => {
         const response = await api.get(`/posts/${id}`);
-        return response.data;
+        return response.data as PostResponse;
     },
     
     create: async (post: PostType): Promise<PostResponse> => {
         const response = await api.post('/posts', post);
-        return response.data;
+        return response.data as PostResponse;
     }
 };
 
