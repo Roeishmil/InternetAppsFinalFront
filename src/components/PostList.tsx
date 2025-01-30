@@ -49,13 +49,16 @@ const PostList: React.FC = () => {
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
-            <h2 className="text-2xl font-bold mb-6">Posts</h2>
+            <h2 className="text-2xl font-bold mb-6">Posts:</h2>
             <div className="grid gap-6 md:grid-cols-2">
                 {posts.map((post) => (
                     <div key={post._id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
                         <Post 
+                            id={post._id}
                             title={post.title}
                             content={post.content}
+                            imageUrl={post.imageUrl}
+                            rating={post.rating}
                         />
                     </div>
                 ))}
