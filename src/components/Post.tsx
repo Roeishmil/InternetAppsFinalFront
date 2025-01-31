@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { FaStar } from 'react-icons/fa';
+import { useAuth } from '../components/AuthContext.tsx';
+import Comments from './Comments';
 
 export interface PostProps {
     id: string;
@@ -7,16 +9,23 @@ export interface PostProps {
     imageUrl: string;
     content: string;
     rating: number;
-    onRate?: (id: string, newRating: number) => void;
+    ratingsByUser: Record<string, number>;
+    onRate?: (id: string, newRating: number, userId: string) => void;
 }
 
-export function Post({ id, title, imageUrl, content, rating, onRate }: PostProps) {
-    const [currentRating, setCurrentRating] = useState(rating);
+export function Post({ id, title, imageUrl, content, rating, ratingsByUser, onRate }: PostProps) {
+    const { user } = useAuth();
+    const [currentRating, setCurrentRating] = useState(user ? ratingsByUser[user.id] || 0 : 0);
+    const [showComments, setShowComments] = useState(false);
 
     const handleRating = (newRating: number) => {
+        if (!user) {
+            alert("You must be logged in to rate!");
+            return;
+        }
         setCurrentRating(newRating);
         if (onRate) {
-            onRate(id, newRating); // מעדכן את ההורה (PostList)
+            onRate(id, newRating, user.id);
         }
     };
 
@@ -26,17 +35,28 @@ export function Post({ id, title, imageUrl, content, rating, onRate }: PostProps
             <div className="card-body text-center">
                 <h5 className="card-title">{title}</h5>
                 <p className="card-text">{content}</p>
-                {/* דירוג לחיץ */}
+
                 <div className="d-flex justify-content-center mt-2">
                     {[1, 2, 3, 4, 5].map((num) => (
                         <FaStar
                             key={num}
                             className={`mx-1 ${num <= currentRating ? "text-warning" : "text-muted"}`}
-                            style={{ cursor: "pointer" }}
+                            style={{ cursor: user ? "pointer" : "not-allowed" }}
                             onClick={() => handleRating(num)}
                         />
                     ))}
                 </div>
+
+                {/* ✅ כפתור הצגת תגובות */}
+                <button
+                    className="btn btn-outline-secondary btn-sm mt-3"
+                    onClick={() => setShowComments(!showComments)}
+                >
+                    {showComments ? "Hide Comments" : "View Comments"}
+                </button>
+
+                {/* ✅ הצגת תגובות לכל המשתמשים */}
+                {showComments && <Comments postId={id} />}
             </div>
         </div>
     );
