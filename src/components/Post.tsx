@@ -30,8 +30,8 @@ export function Post({ id, title, imageUrl, content, rating, ratingsByUser, onRa
     };
 
     return (
-        <div className="card shadow-sm">
-            <img src={imageUrl} alt={title} className="card-img-top" style={{ height: "200px", objectFit: "cover" }} />
+        <div className="card fade-in">
+            <img src={imageUrl} alt={title} className="card-img-top" style={{ height: "200px", objectFit: "cover", borderTopLeftRadius: "10px", borderTopRightRadius: "10px" }} />
             <div className="card-body text-center">
                 <h5 className="card-title">{title}</h5>
                 <p className="card-text">{content}</p>
@@ -41,13 +41,12 @@ export function Post({ id, title, imageUrl, content, rating, ratingsByUser, onRa
                         <FaStar
                             key={num}
                             className={`mx-1 ${num <= currentRating ? "text-warning" : "text-muted"}`}
-                            style={{ cursor: user ? "pointer" : "not-allowed" }}
+                            style={{ cursor: user ? "pointer" : "not-allowed", fontSize: "20px" }}
                             onClick={() => handleRating(num)}
                         />
                     ))}
                 </div>
 
-                {/* ✅ כפתור הצגת תגובות */}
                 <button
                     className="btn btn-outline-secondary btn-sm mt-3"
                     onClick={() => setShowComments(!showComments)}
@@ -55,7 +54,6 @@ export function Post({ id, title, imageUrl, content, rating, ratingsByUser, onRa
                     {showComments ? "Hide Comments" : "View Comments"}
                 </button>
 
-                {/* ✅ הצגת תגובות לכל המשתמשים */}
                 {showComments && <Comments postId={id} />}
             </div>
         </div>
