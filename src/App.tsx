@@ -1,8 +1,8 @@
 import './App.css';
 import PostList from './components/PostList';
 
-function App() {
 
+function App() {
   return (
     <>
       <div className='m-5'>

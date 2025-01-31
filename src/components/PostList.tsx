@@ -1,64 +1,53 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Post from './Post';
-import { postsApi, PostResponse } from '../api';
+import { FaSortAmountDown, FaSortAmountUp } from 'react-icons/fa';
 
 const PostList: React.FC = () => {
-    const [posts, setPosts] = useState<PostResponse[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+    const [posts, setPosts] = useState([
+        { _id: "1", title: "Beautiful Landscape", imageUrl: "/images/sample1.jpg", content: "A stunning view.", rating: 5 },
+        { _id: "2", title: "Cute Cat", imageUrl: "/images/sample2.jpg", content: "A cat playing.", rating: 4 },
+        { _id: "3", title: "Delicious Food", imageUrl: "/images/sample3.jpg", content: "A tasty dish.", rating: 3 },
+    ]);
 
-    useEffect(() => {
-        fetchPosts();
-    }, []);
-
-    const fetchPosts = async () => {
-        try {
-            setLoading(true);
-            const data = await postsApi.getAll();
-            setPosts(data);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'An error occurred while fetching posts');
-        } finally {
-            setLoading(false);
-        }
+    const toggleSortOrder = () => {
+        setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     };
 
-    if (loading) {
-        return (
-            <div className="flex justify-center items-center h-64">
-                <div className="text-gray-600">Loading posts...</div>
-            </div>
+    const handleRatingUpdate = (postId: string, newRating: number) => {
+        setPosts((prevPosts) =>
+            prevPosts.map((post) =>
+                post._id === postId ? { ...post, rating: newRating } : post
+            )
         );
-    }
+    };
 
-    if (error) {
-        return (
-            <div className="flex justify-center items-center h-64">
-                <div className="text-red-500">Error: {error}</div>
-            </div>
-        );
-    }
-
-    if (posts.length === 0) {
-        return (
-            <div className="flex justify-center items-center h-64">
-                <div className="text-gray-600">No posts found.</div>
-            </div>
-        );
-    }
+    const sortedPosts = [...posts].sort((a, b) =>
+        sortOrder === 'asc' ? a.rating - b.rating : b.rating - a.rating
+    );
 
     return (
-        <div className="max-w-4xl mx-auto px-4 py-8">
-            <h2 className="text-2xl font-bold mb-6">Posts:</h2>
-            <div className="grid gap-6 md:grid-cols-2">
-                {posts.map((post) => (
-                    <div key={post._id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+        <div className="container my-5">
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <h2>📸 Latest Posts</h2>
+                <button
+                    onClick={toggleSortOrder}
+                    className="btn btn-primary d-flex align-items-center"
+                >
+                    Sort by Rating {sortOrder === 'asc' ? <FaSortAmountUp className="ms-2" /> : <FaSortAmountDown className="ms-2" />}
+                </button>
+            </div>
+
+            <div className="row g-4">
+                {sortedPosts.map((post) => (
+                    <div key={post._id} className="col-12 col-sm-6 col-md-4">
                         <Post 
                             id={post._id}
                             title={post.title}
                             content={post.content}
                             imageUrl={post.imageUrl}
                             rating={post.rating}
+                            onRate={handleRatingUpdate} // מעביר עדכון דירוג מהילד להורה
                         />
                     </div>
                 ))}
