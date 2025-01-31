@@ -5,19 +5,42 @@ import { FaSortAmountDown, FaSortAmountUp } from 'react-icons/fa';
 const PostList: React.FC = () => {
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const [posts, setPosts] = useState([
-        { _id: "1", title: "Beautiful Landscape", imageUrl: "/images/sample1.jpg", content: "A stunning view.", rating: 5 },
-        { _id: "2", title: "Cute Cat", imageUrl: "/images/sample2.jpg", content: "A cat playing.", rating: 4 },
-        { _id: "3", title: "Delicious Food", imageUrl: "/images/sample3.jpg", content: "A tasty dish.", rating: 3 },
+        { 
+            _id: "1", 
+            title: "Beautiful Landscape", 
+            imageUrl: "/images/sample1.jpg", 
+            content: "A stunning view.", 
+            rating: 5,
+            ratingsByUser: {} // ✅ הוספת `ratingsByUser`
+        },
+        { 
+            _id: "2", 
+            title: "Cute Cat", 
+            imageUrl: "/images/sample2.jpg", 
+            content: "A cat playing.", 
+            rating: 4,
+            ratingsByUser: {} // ✅ הוספת `ratingsByUser`
+        },
+        { 
+            _id: "3", 
+            title: "Delicious Food", 
+            imageUrl: "/images/sample3.jpg", 
+            content: "A tasty dish.", 
+            rating: 3,
+            ratingsByUser: {} // ✅ הוספת `ratingsByUser`
+        },
     ]);
 
     const toggleSortOrder = () => {
         setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     };
 
-    const handleRatingUpdate = (postId: string, newRating: number) => {
+    const handleRatingUpdate = (postId: string, newRating: number, userId: string) => {
         setPosts((prevPosts) =>
             prevPosts.map((post) =>
-                post._id === postId ? { ...post, rating: newRating } : post
+                post._id === postId 
+                    ? { ...post, ratingsByUser: { ...post.ratingsByUser, [userId]: newRating } }
+                    : post
             )
         );
     };
@@ -47,7 +70,8 @@ const PostList: React.FC = () => {
                             content={post.content}
                             imageUrl={post.imageUrl}
                             rating={post.rating}
-                            onRate={handleRatingUpdate} // מעביר עדכון דירוג מהילד להורה
+                            ratingsByUser={post.ratingsByUser} // ✅ שולחים את הנתון לפוסט
+                            onRate={handleRatingUpdate}
                         />
                     </div>
                 ))}
