@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../components/AuthContext.tsx';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
+import '../styles/Comments.css'; // נוסיף קובץ CSS לאנימציות
 
 interface Comment {
     id: number;
@@ -31,21 +33,21 @@ const Comments: React.FC<CommentsProps> = ({ postId }) => {
     return (
         <div className="mt-3 p-3 border rounded">
             <h6>Comments</h6>
-            
-            {/* ✅ התגובות יוצגו תמיד */}
-            <ul className="list-group mb-2">
+
+            <TransitionGroup component="ul" className="list-group mb-2">
                 {comments.length === 0 ? (
                     <li className="list-group-item text-muted">No comments yet.</li>
                 ) : (
                     comments.map(comment => (
-                        <li key={comment.id} className="list-group-item">
-                            <strong>{comment.user}:</strong> {comment.text}
-                        </li>
+                        <CSSTransition key={comment.id} timeout={300} classNames="fade">
+                            <li className="list-group-item">
+                                <strong>{comment.user}:</strong> {comment.text}
+                            </li>
+                        </CSSTransition>
                     ))
                 )}
-            </ul>
+            </TransitionGroup>
 
-            {/* ✅ תיבת תגובה מופיעה רק אם המשתמש מחובר */}
             {user ? (
                 <div className="d-flex">
                     <input

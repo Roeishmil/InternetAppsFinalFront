@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { PostType } from './components/Post';
+import { PostProps } from './components/Post';
 
 // Create axios instance with base configuration
 const api = axios.create({
@@ -10,7 +10,7 @@ const api = axios.create({
 });
 
 // Interface for API response including any additional fields from backend
-export interface PostResponse extends PostType {
+export interface PostResponse extends PostProps {
     _id: string;
     // Add any other fields your backend returns
 }
@@ -28,7 +28,7 @@ export const postsApi = {
         return response.data as PostResponse;
     },
     
-    create: async (post: PostType): Promise<PostResponse> => {
+    create: async (post: PostProps): Promise<PostResponse> => {
         const response = await api.post('/posts', post);
         return response.data as PostResponse;
     }
