@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { FaThumbsUp } from 'react-icons/fa';
 import { useAuth } from '../components/AuthContext.tsx';
+import { useNavigate } from 'react-router-dom';
 import Comments from './Comments';
-import { postsApi } from '../api'; // ✅ נוסיף חיבור ל-Backend
+import { postsApi } from '../api';
 
 export interface PostProps {
     id: string;
@@ -15,9 +16,10 @@ export interface PostProps {
 
 export function Post({ id, title, imageUrl, content, likes, likedByUser }: PostProps) {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [likeCount, setLikeCount] = useState(likes);
     const [isLiked, setIsLiked] = useState(likedByUser);
-    const [showComments, setShowComments] = useState(false);
+    const [showCommentsPreview, setShowCommentsPreview] = useState(false);
 
     const handleLike = async () => {
         if (!user) {
@@ -26,10 +28,10 @@ export function Post({ id, title, imageUrl, content, likes, likedByUser }: PostP
         }
         try {
             if (isLiked) {
-                await postsApi.unlikePost(user.id, id);
+                await postsApi.unlikePost(id, user.id);
                 setLikeCount(prev => prev - 1);
             } else {
-                await postsApi.likePost(user.id, id);
+                await postsApi.likePost(id, user.id);
                 setLikeCount(prev => prev + 1);
             }
             setIsLiked(!isLiked);
@@ -39,23 +41,32 @@ export function Post({ id, title, imageUrl, content, likes, likedByUser }: PostP
     };
 
     return (
-        <div className="card fade-in">
-            <img src={imageUrl} alt={title} className="card-img-top" style={{ height: "200px", objectFit: "cover", borderTopLeftRadius: "10px", borderTopRightRadius: "10px" }} />
+        <div className="card post-card shadow-sm">
+            <img src={imageUrl} alt={title} className="card-img-top post-image" />
             <div className="card-body text-center">
-                <h5 className="card-title">{title}</h5>
+                <h5 className="card-title fw-bold">{title}</h5>
                 <p className="card-text">{content}</p>
 
-                <button className={`btn btn-like ${isLiked ? 'liked' : ''}`} onClick={handleLike}>
-                    <FaThumbsUp /> {likeCount}
+                <button className={`btn btn-like ${isLiked ? 'btn-danger' : 'btn-outline-primary'}`} onClick={handleLike}>
+                    <FaThumbsUp /> {likeCount} Likes
                 </button>
 
-                <button className="btn btn-outline-secondary btn-sm mt-3" onClick={() => setShowComments(!showComments)}>
-                    {showComments ? "Hide Comments" : "View Comments"}
+                <button className="btn btn-outline-secondary btn-sm mt-3" onClick={() => setShowCommentsPreview(!showCommentsPreview)}>
+                    {showCommentsPreview ? "Hide Comments Preview" : "View Comments Preview"}
                 </button>
 
-                {showComments && <Comments postId={id} />}
+                {showCommentsPreview && (
+                    <div className="comment-preview p-3 mt-3 border rounded bg-light">
+                        <Comments postId={id} preview={true} />
+                        
+                        <button className="btn btn-primary btn-sm mt-2 w-100" onClick={() => navigate(`/post/${id}/comments`)}>
+                            View All Comments
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
+
     );
 }
 

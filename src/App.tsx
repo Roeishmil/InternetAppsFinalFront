@@ -1,23 +1,30 @@
-import PostList from "./components/PostList";
-import Header from "./components/Header"; 
-import LoginRegister from "./components/LoginRegister"; // ✅ נוסיף את עמוד ההתחברות
-import { useAuth } from "./components/AuthContext.tsx";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import "./styles/theme.css";
+import "./styles/Header.css";
+import "./styles/Comments.css";
+import PostList from "./components/PostList";
+import PostCommentsPage from "./components/PostCommentsPage";
+import Header from "./components/Header";
+import LoginRegister from "./components/LoginRegister";
+import { AuthProvider, useAuth } from "./components/AuthContext.tsx";
+
+function ProtectedRoute({ children }: { children: JSX.Element }) {
+    const { user } = useAuth();
+    return user ? children : <Navigate to="/login" />;
+}
 
 function App() {
-    const { user } = useAuth();
-
     return (
-        <>
-            <Header />
-            {!user ? (
-                <LoginRegister />
-            ) : (
-                <div className="m-5">
-                    <PostList />
-                </div>
-            )}
-        </>
+        <Router>
+            <AuthProvider>
+                <Header />
+                <Routes>
+                    <Route path="/" element={<PostList />} /> 
+                    <Route path="/login" element={<LoginRegister />} />
+                    <Route path="/post/:postId/comments" element={<ProtectedRoute><PostCommentsPage /></ProtectedRoute>} /> {/* ✅ תגובות דורשות התחברות */}
+                </Routes>
+            </AuthProvider>
+        </Router>
     );
 }
 

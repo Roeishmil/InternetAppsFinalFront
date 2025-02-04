@@ -1,33 +1,26 @@
-import React from "react";
-import { FaPlus, FaSearch, FaBell, FaUser } from "react-icons/fa";
-import { useAuth } from "../components/AuthContext.tsx";
-import "../styles/Header.css"; // נוסיף עיצוב מתאים
+import { Link } from "react-router-dom";
+import { useAuth } from "./AuthContext";
 
-const Header: React.FC = () => {
-    const { user } = useAuth();
+const Header = () => {
+    const { user, logout } = useAuth();
 
     return (
-        <header className="header">
-            <div className="container d-flex justify-content-between align-items-center">
-                <h2 className="logo">📷 PhotoShare</h2>
+        <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm fixed-top">
+            <div className="container">
+                <Link className="navbar-brand fw-bold text-white" to="/">📸 PhotoApp</Link>
 
-                <div className="header-buttons">
-                    <button className="btn-icon">
-                        <FaSearch />
-                    </button>
-                    <button className="btn-icon">
-                        <FaPlus />
-                    </button>
-                    <button className="btn-icon">
-                        <FaBell />
-                    </button>
-                    <button className="btn-icon">
-                        <FaUser />
-                        <span>{user ? user.name : "Guest"}</span>
-                    </button>
+                <div className="d-flex align-items-center">
+                    {user ? (
+                        <>
+                            <span className="navbar-text me-3 fw-semibold text-white">👤 {user.name}</span>
+                            <button className="btn btn-light btn-sm" onClick={logout}>Logout</button>
+                        </>
+                    ) : (
+                        <Link className="btn btn-light btn-sm" to="/login">Login</Link>
+                    )}
                 </div>
             </div>
-        </header>
+        </nav>
     );
 };
 
