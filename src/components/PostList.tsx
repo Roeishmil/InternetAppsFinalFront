@@ -47,11 +47,8 @@ const PostList: React.FC = () => {
     return (
         <div className="container my-5">
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2>📸 Latest Posts</h2>
-                <button
-                    onClick={handleSort}
-                    className="btn btn-primary d-flex align-items-center"
-                >
+                <h2 className="fw-bold text-primary">📸 Latest Posts</h2>
+                <button onClick={handleSort} className="btn btn-outline-primary d-flex align-items-center">
                     Sort by Rating {sortOrder === 'asc' ? <FaSortAmountUp className="ms-2" /> : <FaSortAmountDown className="ms-2" />}
                 </button>
             </div>
@@ -64,6 +61,7 @@ const PostList: React.FC = () => {
                 ))}
             </div>
         </div>
+
     );
 };
 
