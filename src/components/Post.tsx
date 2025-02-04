@@ -1,31 +1,40 @@
-import React, { useState } from 'react';
-import { FaStar } from 'react-icons/fa';
+import { useState } from 'react';
+import { FaThumbsUp } from 'react-icons/fa';
 import { useAuth } from '../components/AuthContext.tsx';
 import Comments from './Comments';
+import { postsApi } from '../api'; // ✅ נוסיף חיבור ל-Backend
 
 export interface PostProps {
     id: string;
     title: string;
     imageUrl: string;
     content: string;
-    rating: number;
-    ratingsByUser: Record<string, number>;
-    onRate?: (id: string, newRating: number, userId: string) => void;
+    likes: number;
+    likedByUser: boolean;
 }
 
-export function Post({ id, title, imageUrl, content, rating, ratingsByUser, onRate }: PostProps) {
+export function Post({ id, title, imageUrl, content, likes, likedByUser }: PostProps) {
     const { user } = useAuth();
-    const [currentRating, setCurrentRating] = useState(user ? ratingsByUser[user.id] || 0 : 0);
+    const [likeCount, setLikeCount] = useState(likes);
+    const [isLiked, setIsLiked] = useState(likedByUser);
     const [showComments, setShowComments] = useState(false);
 
-    const handleRating = (newRating: number) => {
+    const handleLike = async () => {
         if (!user) {
-            alert("You must be logged in to rate!");
+            alert("You must be logged in to like posts!");
             return;
         }
-        setCurrentRating(newRating);
-        if (onRate) {
-            onRate(id, newRating, user.id);
+        try {
+            if (isLiked) {
+                await postsApi.unlikePost(user.id, id);
+                setLikeCount(prev => prev - 1);
+            } else {
+                await postsApi.likePost(user.id, id);
+                setLikeCount(prev => prev + 1);
+            }
+            setIsLiked(!isLiked);
+        } catch (error) {
+            console.error("Error updating like:", error);
         }
     };
 
@@ -36,21 +45,11 @@ export function Post({ id, title, imageUrl, content, rating, ratingsByUser, onRa
                 <h5 className="card-title">{title}</h5>
                 <p className="card-text">{content}</p>
 
-                <div className="d-flex justify-content-center mt-2">
-                    {[1, 2, 3, 4, 5].map((num) => (
-                        <FaStar
-                            key={num}
-                            className={`mx-1 ${num <= currentRating ? "text-warning" : "text-muted"}`}
-                            style={{ cursor: user ? "pointer" : "not-allowed", fontSize: "20px" }}
-                            onClick={() => handleRating(num)}
-                        />
-                    ))}
-                </div>
+                <button className={`btn btn-like ${isLiked ? 'liked' : ''}`} onClick={handleLike}>
+                    <FaThumbsUp /> {likeCount}
+                </button>
 
-                <button
-                    className="btn btn-outline-secondary btn-sm mt-3"
-                    onClick={() => setShowComments(!showComments)}
-                >
+                <button className="btn btn-outline-secondary btn-sm mt-3" onClick={() => setShowComments(!showComments)}>
                     {showComments ? "Hide Comments" : "View Comments"}
                 </button>
 

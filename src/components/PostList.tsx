@@ -1,29 +1,44 @@
 import React, { useState, useEffect } from 'react';
-import Post from './Post';
+import Post, {PostProps} from './Post';
 import { FaSortAmountDown, FaSortAmountUp } from 'react-icons/fa';
 import Spinner from './Spinner';
+import { postsApi } from '../api';
 
 const PostList: React.FC = () => {
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const [posts, setPosts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
+    const fetchPosts = async () => {
+        setLoading(true);
+        const data = await postsApi.getAll() as PostProps[];
+        setLoading(false);
+        setPosts(data);
+    };
+    
     useEffect(() => {
-        setTimeout(() => { // מחקה קריאה ל-Backend
-            setPosts([
-                { _id: "1", title: "Beautiful Landscape", imageUrl: "/images/sample1.jpg", content: "A stunning view.", rating: 5, ratingsByUser: {} },
-                { _id: "2", title: "Cute Cat", imageUrl: "/images/sample2.jpg", content: "A cat playing.", rating: 4, ratingsByUser: {} },
-                { _id: "3", title: "Delicious Food", imageUrl: "/images/sample3.jpg", content: "A tasty dish.", rating: 3, ratingsByUser: {} },
-                { _id: "4", title: "Cactus", imageUrl: "/images/sample1.jpg", content: "A tasty dish.", rating: 3, ratingsByUser: {} },
-                { _id: "5", title: "Space", imageUrl: "/images/sample2.jpg", content: "A tasty dish.", rating: 3, ratingsByUser: {} },
-                { _id: "6", title: "Shop", imageUrl: "/images/sample3.jpg", content: "A tasty dish.", rating: 3, ratingsByUser: {} },
-                { _id: "7", title: "Horse", imageUrl: "/images/sample3.jpg", content: "A tasty dish.", rating: 3, ratingsByUser: {} },
-                { _id: "8", title: "Infi 2", imageUrl: "/images/sample1.jpg", content: "A tasty dish.", rating: 3, ratingsByUser: {} },
-
-            ]);
-            setLoading(false);
-        }, 1500); // מחכה 1.5 שניות
+        fetchPosts();
+        refreshPosts();
     }, []);
+    
+    const refreshPosts = async () => {
+        fetchPosts();
+    };
+    
+
+    const handleSort = () => {
+        setSortOrder(prevSortOrder => {
+            const newSortOrder = prevSortOrder === 'asc' ? 'desc' : 'asc';
+            setPosts(prevPosts =>
+                [...prevPosts].sort((a, b) =>
+                    newSortOrder === 'desc' 
+                        ? b.likes - a.likes || Math.random() - 0.5
+                        : a.likes - b.likes || Math.random() - 0.5
+                )
+            );
+            return newSortOrder;
+        });
+    };
 
     if (loading) {
         return <Spinner />;
@@ -34,7 +49,7 @@ const PostList: React.FC = () => {
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h2>📸 Latest Posts</h2>
                 <button
-                    onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                    onClick={handleSort}
                     className="btn btn-primary d-flex align-items-center"
                 >
                     Sort by Rating {sortOrder === 'asc' ? <FaSortAmountUp className="ms-2" /> : <FaSortAmountDown className="ms-2" />}
