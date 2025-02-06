@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useAuth } from "./AuthContext";
 import { useNavigate } from "react-router-dom";
 
 const LoginRegister = () => {
-    const { login, register } = useAuth();
+    const { login, register } = useAuth(); // Import the login and register functions from the AuthContext
     const navigate = useNavigate();
     const [isRegistering, setIsRegistering] = useState(false);
     const [email, setEmail] = useState("");
@@ -16,7 +16,6 @@ const LoginRegister = () => {
         } else {
             await login(email, password);
         }
-        navigate("/"); // ✅ אחרי התחברות, הניווט קורה כאן
     };
 
     return (
@@ -37,6 +36,10 @@ const LoginRegister = () => {
         <button className="btn btn-link mt-2" onClick={() => setIsRegistering(!isRegistering)}>
             {isRegistering ? "Already have an account? Login" : "New here? Register"}
         </button>
+
+        <button className="btn btn-secondary w-100 mt-2 rounded-pill" onClick={() => navigate("/")}>
+                Go back
+            </button>
     </div>
     );
 };
