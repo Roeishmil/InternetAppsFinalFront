@@ -3,12 +3,14 @@ import Post, {PostProps} from './Post';
 import { FaSortAmountDown, FaSortAmountUp } from 'react-icons/fa';
 import Spinner from './Spinner';
 import { postsApi } from '../api';
+import { useNavigate } from 'react-router-dom';
+
 
 const PostList: React.FC = () => {
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const [posts, setPosts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-
+    const navigate = useNavigate();
     const fetchPosts = async () => {
         setLoading(true);
         const data = await postsApi.getAll() as PostProps[];
@@ -51,6 +53,9 @@ const PostList: React.FC = () => {
                 <button onClick={handleSort} className="btn btn-outline-primary d-flex align-items-center">
                     Sort by Rating {sortOrder === 'asc' ? <FaSortAmountUp className="ms-2" /> : <FaSortAmountDown className="ms-2" />}
                 </button>
+                <button className="btn btn-primary btn-sm mt-2 w-10" onClick={() => navigate(`/createNewPost`)}>
+                            Create a new post
+                        </button>
             </div>
 
             <div className="row g-4">

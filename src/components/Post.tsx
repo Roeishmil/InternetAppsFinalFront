@@ -6,15 +6,22 @@ import Comments from './Comments';
 import { postsApi } from '../api';
 
 export interface PostProps {
-    id: string;
+    _id: string;
     title: string;
-    imageUrl: string;
+    owner: string;
+    imgUrl: string;
     content: string;
     likes: number;
     likedByUser: boolean;
 }
 
-export function Post({ id, title, imageUrl, content, likes, likedByUser }: PostProps) {
+export function Post({ _id, title, imgUrl, content, likes, likedByUser }: PostProps) {
+
+    //imgUrl = "public/images/sample1.jpg";
+    //imgUrl = 'http://localhost:3000' + '/storage/67a5c2b3ddf347fabb78ebce/squidwardbathroom-1738916531249.jpg';
+
+    console.log("Image",imgUrl);
+    console.log("Id",_id);
     const { user } = useAuth();
     const navigate = useNavigate();
     const [likeCount, setLikeCount] = useState(likes);
@@ -28,10 +35,10 @@ export function Post({ id, title, imageUrl, content, likes, likedByUser }: PostP
         }
         try {
             if (isLiked) {
-                await postsApi.unlikePost(id, user.id);
+                await postsApi.unlikePost(_id, user.id);
                 setLikeCount(prev => prev - 1);
             } else {
-                await postsApi.likePost(id, user.id);
+                await postsApi.likePost(_id, user.id);
                 setLikeCount(prev => prev + 1);
             }
             setIsLiked(!isLiked);
@@ -42,7 +49,7 @@ export function Post({ id, title, imageUrl, content, likes, likedByUser }: PostP
 
     return (
         <div className="card post-card shadow-sm">
-            <img src={imageUrl} alt={title} className="card-img-top post-image" />
+            <img src={imgUrl} alt={title} className="card-img-top post-image" />
             <div className="card-body text-center">
                 <h5 className="card-title fw-bold">{title}</h5>
                 <p className="card-text">{content}</p>
@@ -57,9 +64,9 @@ export function Post({ id, title, imageUrl, content, likes, likedByUser }: PostP
 
                 {showCommentsPreview && (
                     <div className="comment-preview p-3 mt-3 border rounded bg-light">
-                        <Comments postId={id} preview={true} />
+                        <Comments postId={_id} preview={true} />
                         
-                        <button className="btn btn-primary btn-sm mt-2 w-100" onClick={() => navigate(`/post/${id}/comments`)}>
+                        <button className="btn btn-primary btn-sm mt-2 w-100" onClick={() => navigate(`/post/${_id}/comments`)}>
                             View All Comments
                         </button>
                     </div>
