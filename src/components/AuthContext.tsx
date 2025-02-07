@@ -6,14 +6,14 @@ const API_URL = "http://localhost:3000/auth"; // Define the API URL
 
 interface User {
     id: string;
-    name: string;
+    username: string;
     token: string;
 }
 
 interface AuthContextType {
     user: User | null;
     login: (email: string, password: string) => Promise<void>;
-    register: (name: string, email: string, password: string) => Promise<void>;
+    register: (username: string, email: string, password: string) => Promise<void>;
     logout: () => void;
 }
 
@@ -37,6 +37,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 const userData: User = response.data as User; // Extract the user data from the response
                 setUser(userData);
                 localStorage.setItem("user", JSON.stringify(userData)); // Store the user data in local storage
+                alert("Login successful - welcome!");
+                window.location.href = "/";
             } else {
                 alert("Invalid credentials. Please try again.");  
             }
@@ -47,12 +49,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
     
 
-    const register = async (name: string, email: string, password: string) => {
+    const register = async (username: string, email: string, password: string) => {
         try {
-            await axios.post(`${API_URL}/register`, { name, email, password }); // Send a POST request to the API
-            await login(email, password); // Log in the user after registration
+            console.log(username,password,email);
+            const response = await axios.post(`${API_URL}/register`, { username, email , password },
+                {
+                    headers: { "Content-Type": "application/json"}
+                }
+
+            ); // Send a POST request to the API
+            if(response.status == 200){
+                alert('Registration Successfull!');
+                await login(email, password); // Log in the user after registration
+            }
         } catch (error) {
-            alert("Registration failed: An error occurred." + error);
+            alert("Registration failed: An error occurred. " + error.response?.data?.message || 'An unexpected error occured');
             console.log(API_URL);
             console.error("Registration failed:", error);
         }
@@ -61,6 +72,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const logout = () => {
         setUser(null); // Clear the user data
         localStorage.removeItem("user"); // Remove the user data from local storage
+        alert("Logout successful - Goodbye");
+        window.location.href = "/";
     };
 
     return (

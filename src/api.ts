@@ -18,8 +18,14 @@ export const postsApi = {
         const response = await api.get(`/posts/${id}`);
         return response.data;
     },
+
     create: async (post: PostProps) => {
-        const response = await api.post('/posts', post);
+        console.log("Post is" ,post);
+        const response = await api.post('/posts', post,{
+            headers:{
+                "Content-Type": "multipart/form-data",
+            },
+        });
         return response.data;
     },
     likePost: async (postId: string, userId: string) => {
@@ -30,6 +36,9 @@ export const postsApi = {
         const response = await api.post(`/posts/${postId}/delete`, { userId });
         return response.data;
     }
+    // getUrl: (){
+    //     return api.b
+    // }
 };
 
 export const commentsApi = {
