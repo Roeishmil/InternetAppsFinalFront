@@ -1,5 +1,5 @@
 import { PostProps } from "./components/Post";
-import axios from "axios";
+import axios, { get } from "axios";
 
 
 export const api = axios.create({
@@ -55,6 +55,10 @@ export const postsApi = {
 };
 
 export const commentsApi = {
+    getAll: async () => {
+        const response = await api.get('/comments');
+        return response.data;
+    },
     getByPostId: async (postId: string) => {
         const response = await api.get(`/comments/${postId}`);
         return response.data;
@@ -65,12 +69,12 @@ export const commentsApi = {
         const response = await api.post(`/comments`, {comment, owner,postId });
         return response.data;
     },
-    delete: async (postId: string, commentId: string) => {
-        const response = await api.delete(`/posts/${postId}/comments/${commentId}`);
+    delete: async ( commentId: string) => {
+        const response = await api.delete(`/comments/${commentId}`);
         return response.data;
     }, 
-    update: async (postId: string, commentId: string, text: string) => {
-        const response = await api.put(`/posts/${postId}/comments/${commentId}`, { text });
+    update: async ( commentId: string, text: string) => {
+        const response = await api.put(`/comments/${commentId}`, { text });
         return response.data;
     }     
 };

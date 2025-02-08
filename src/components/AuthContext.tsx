@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import axios from "axios";
-import { UserProfileI } from "./userProfile";
+import {UserProfileI} from "./userProfile";
 
 
 const API_URL = "http://localhost:3000/auth"; // Define the API URL

@@ -1,16 +1,89 @@
-.fade-enter {
-    opacity: 0;
-    transform: translateY(-10px);
+.comments-container {
+    max-width: 600px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
-.fade-enter-active {
-    opacity: 1;
-    transform: translateY(0);
-    transition: opacity 300ms ease-in, transform 300ms ease-in;
+
+.comment-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
 }
-.fade-exit {
-    opacity: 1;
+
+.comment-input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    transition: all 0.3s ease-in-out;
 }
-.fade-exit-active {
-    opacity: 0;
-    transition: opacity 300ms ease-out;
+
+.comment-input:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.send-button {
+    background: #007bff;
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.send-button:hover {
+    background: #0056b3;
+}
+
+.comment-item {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 8px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.comment-item:hover {
+    transform: scale(1.02);
+}
+
+.comment-owner {
+    font-weight: bold;
+    color: #333;
+}
+
+.comment-text {
+    margin-top: 5px;
+    font-size: 14px;
+}
+
+.comment-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 5px;
+}
+
+.edit-icon, .delete-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.3s ease;
+}
+
+.edit-icon:hover {
+    color: #007bff;
+}
+
+.delete-icon:hover {
+    color: #dc3545;
 }

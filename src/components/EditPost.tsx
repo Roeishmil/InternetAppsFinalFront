@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../components/AuthContext';
 import { postsApi } from '../api';
+import { PostProps } from './Post';
 
 const EditPost: React.FC = () => {
     const { postId } = useParams();
