@@ -5,10 +5,12 @@ import { userProfileApi, UserProfileI } from '../api';
 const UserProfile = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [isEditingName, setIsEditingName] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isImageLoading, setIsImageLoading] = useState(false);
     const [tempImgUrl, setTempImgUrl] = useState<string | null>(null);
     const [isEditingImage, setIsEditingImage] = useState(false);
+    const [originalImage, setOriginalImage] = useState<string>('');
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [userData, setUserData] = useState<UserProfileI>({
@@ -31,6 +33,7 @@ const UserProfile = () => {
             const data = await userProfileApi.getByUsername(username);
             data.password = JSON.parse(localStorage.getItem("user") || "{}").password;
             setUserData(data);
+            setOriginalImage(data.imgUrl);
             console.log('User data is', data);
         } catch (error) {
             console.error('Error fetching user data:', error);
@@ -53,7 +56,7 @@ const UserProfile = () => {
     };
 
     const handleImageClick = (e: React.MouseEvent) => {
-        e.stopPropagation(); // Stop event propagation
+        e.stopPropagation();
         fileInputRef.current?.click();
     };
 
@@ -96,6 +99,13 @@ const UserProfile = () => {
         }
     };
 
+    const handleRevertImage = () => {
+        setTempImgUrl(null);
+        setSelectedFile(null);
+        setIsEditingImage(false);
+        setUserData(prev => ({ ...prev, imgUrl: originalImage }));
+    };
+
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -106,71 +116,85 @@ const UserProfile = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto">
-            <div className="bg-white shadow-xl rounded-lg overflow-hidden">
-                {/* Header Section */}
-                <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-8 py-10">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                            {/* Change this div to not have onClick */}
-                            <div className="relative">
-                                {isImageLoading ? (
-                                    <div className="h-24 w-24 rounded-full bg-white/30 flex items-center justify-center">
-                                        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
-                                    </div>
-                                ) : isEditingImage ? (
-                                    <div className="relative h-24 w-24">
-                                        <img 
-                                            src={tempImgUrl || ''} 
-                                            alt="Preview" 
-                                            className="h-24 w-24 rounded-full object-cover border-2 border-white"
-                                        />
-                                    </div>
-                                ) : (
-                                    // Add onClick only to this button wrapper
-                                    <button 
-                                        onClick={handleImageClick}
-                                        className="relative h-24 w-24 rounded-full focus:outline-none"
-                                    >
-                                        {userData.imgUrl ? (
-                                            <>
-                                                <img 
-                                                    src={userData.imgUrl} 
-                                                    alt="Profile" 
-                                                    className="h-24 w-24 rounded-full object-cover border-2 border-white"
-                                                />
-                                                <div className="absolute inset-0 rounded-full bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center">
-                                                    <Camera className="h-8 w-8 text-white opacity-0 hover:opacity-100" />
-                                                </div>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <div className="h-24 w-24 rounded-full bg-white/30 flex items-center justify-center text-white text-4xl font-bold">
-                                                    {userData.username.charAt(0).toUpperCase()}
-                                                </div>
-                                                <div className="absolute inset-0 rounded-full bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center">
-                                                    <Camera className="h-8 w-8 text-white opacity-0 hover:opacity-100" />
-                                                </div>
-                                            </>
-                                        )}
-                                    </button>
-                                )}
-                                <input 
-                                    type="file" 
-                                    ref={fileInputRef} 
-                                    className="hidden" 
-                                    accept="image/*" 
-                                    onChange={handleImageSelect} 
-                                />
-                            </div>
-                            <div className="ml-6">
-                                <h1 className="text-2xl font-bold text-white">{userData.username}</h1>
-                                <p className="text-blue-100 mt-1">Account Settings</p>
+            <div className="max-w-3xl mx-auto">
+                <div className="bg-white shadow-xl rounded-lg overflow-hidden">
+                    {/* Header Section */}
+                    <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-8 py-10">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center">
+                                <div className="relative">
+                                    {isImageLoading ? (
+                                        <div className="h-24 w-24 rounded-full bg-white/30 flex items-center justify-center">
+                                            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
+                                        </div>
+                                    ) : (
+                                        <button 
+                                            onClick={handleImageClick}
+                                            className="relative h-24 w-24 rounded-full focus:outline-none"
+                                        >
+                                            {(isEditingImage ? tempImgUrl : userData.imgUrl) ? (
+                                                <>
+                                                    <img 
+                                                        src={isEditingImage ? tempImgUrl || '' : userData.imgUrl} 
+                                                        alt="Profile" 
+                                                        className="h-24 w-24 rounded-full object-cover border-2 border-white"
+                                                    />
+                                                    <div className="absolute inset-0 rounded-full bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center">
+                                                        <Camera className="h-8 w-8 text-white opacity-0 hover:opacity-100" />
+                                                    </div>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <div className="h-24 w-24 rounded-full bg-white/30 flex items-center justify-center text-white text-4xl font-bold">
+                                                        {userData.username.charAt(0).toUpperCase()}
+                                                    </div>
+                                                    <div className="absolute inset-0 rounded-full bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center">
+                                                        <Camera className="h-8 w-8 text-white opacity-0 hover:opacity-100" />
+                                                    </div>
+                                                </>
+                                            )}
+                                        </button>
+                                    )}
+                                    <input 
+                                        type="file" 
+                                        ref={fileInputRef} 
+                                        className="hidden" 
+                                        accept="image/*" 
+                                        onChange={handleImageSelect} 
+                                    />
+                                </div>
+                                <div className="ml-6">
+                                    {isEditingName ? (
+                                        <div className="flex items-center space-x-2">
+                                            <input
+                                                type="text"
+                                                value={userData.username}
+                                                onChange={(e) => setUserData(prev => ({ ...prev, username: e.target.value }))}
+                                                className="text-2xl font-bold text-white bg-transparent border-b border-white focus:outline-none"
+                                            />
+                                            <button 
+                                                onClick={() => setIsEditingName(false)}
+                                                className="px-3 py-1 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                                            >
+                                                Save
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center space-x-2">
+                                            <h1 className="text-2xl font-bold text-white">{userData.username}</h1>
+                                            <button 
+                                                onClick={() => setIsEditingName(true)}
+                                                className="px-2 py-1 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                                            >
+                                                Edit
+                                            </button>
+                                        </div>
+                                    )}
+                                    <p className="text-blue-100 mt-1">Account Settings</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-
 
                     {/* Image Edit Controls */}
                     {isEditingImage && (
@@ -178,9 +202,15 @@ const UserProfile = () => {
                             <div className="flex justify-center gap-4">
                                 <button 
                                     onClick={handleSaveImage}
-                                    className="px-4 py-2 bg-blue-500 text-gray rounded-md hover:bg-blue-600"
+                                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
                                 >
-                                    Save Image
+                                    Save New Image
+                                </button>
+                                <button 
+                                    onClick={handleRevertImage}
+                                    className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
+                                >
+                                    Revert to Original
                                 </button>
                                 <button 
                                     onClick={() => {
@@ -188,7 +218,7 @@ const UserProfile = () => {
                                         setTempImgUrl(null);
                                         setSelectedFile(null);
                                     }} 
-                                    className="px-4 py-2 bg-gray-400 text-gray rounded-md hover:bg-gray-500"
+                                    className="px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500"
                                 >
                                     Cancel
                                 </button>
@@ -196,6 +226,7 @@ const UserProfile = () => {
                         </div>
                     )}
 
+                    {/* Rest of the component remains the same */}
                     {/* Content Section */}
                     <div className="px-8 py-6">
                         {/* Username Section */}
