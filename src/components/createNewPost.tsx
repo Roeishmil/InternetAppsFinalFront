@@ -62,43 +62,7 @@ const CreateNewPost: React.FC = () => {
     }
 };
 
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
 
-//     // Add owner ID
-//     const userId = JSON.parse(localStorage.getItem("user") || "{}").id;
-//     console.log(userId);
-
-
-//     const newPost = {
-//       ...post,
-//       owner: userId,
-//     };
-
-//     // Create a FormData object to handle file upload
-//     const formData = new FormData();
-
-//     // Append the post data to FormData
-//     for (const key in newPost) {
-//     formData.append(key, newPost[key as keyof typeof newPost]);
-//     }
-
-
-//     try {
-//       console.log("new post is",newPost);
-//       console.log("formdata is ",formData);
-//       const response =  postsApi.create(formData);
-//       console.log("status is", response.status);
-//       if (response.status === 201){
-//       console.log("Post created:", response);
-//       navigate("/"); // Redirect after successful post creation
-//       }else{
-//         console.log("Post failed:", response);
-//       }
-//     } catch (error) {
-//       console.error("Error creating post:", error);
-//     }
-//   };
 
   return (
     <div className="container">

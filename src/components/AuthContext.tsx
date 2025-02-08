@@ -1,17 +1,18 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import axios from "axios";
+import { UserProfileI } from "./userProfile";
 
 
 const API_URL = "http://localhost:3000/auth"; // Define the API URL
 
-interface User {
-    id: string;
-    username: string;
-    token: string;
-}
+// interface UserProfileI {
+//     id: string;
+//     username: string;
+//     token: string;
+// }
 
 interface AuthContextType {
-    user: User | null;
+    user: UserProfileI | null;
     login: (email: string, password: string) => Promise<void>;
     register: (username: string, email: string, password: string) => Promise<void>;
     logout: () => void;
@@ -20,7 +21,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined); 
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<UserProfileI | null>(null);
 
     useEffect(() => {
         const storedUser = localStorage.getItem("user");
@@ -34,7 +35,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             const response = await axios.post(`${API_URL}/login`, { email, password }); // Send a POST request to the API
     
             if (response.status === 200) { 
-                const userData: User = response.data as User; // Extract the user data from the response
+                const userData: UserProfileI = response.data as UserProfileI; // Extract the user data from the response
                 setUser(userData);
                 localStorage.setItem("user", JSON.stringify(userData)); // Store the user data in local storage
                 alert("Login successful - welcome!");

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaThumbsUp } from 'react-icons/fa';
+import { FaThumbsUp,FaEdit,FaTrash } from 'react-icons/fa';
 import { useAuth } from '../components/AuthContext.tsx';
 import { useNavigate } from 'react-router-dom';
 import Comments from './Comments';
@@ -15,13 +15,14 @@ export interface PostProps {
     likedByUser: boolean;
 }
 
-export function Post({ _id, title, imgUrl, content, likes, likedByUser }: PostProps) {
+export function Post({ _id, title, owner, imgUrl, content, likes, likedByUser }: PostProps) {
 
     //imgUrl = "public/images/sample1.jpg";
     //imgUrl = 'http://localhost:3000' + '/storage/67a5c2b3ddf347fabb78ebce/squidwardbathroom-1738916531249.jpg';
 
     console.log("Image",imgUrl);
     console.log("Id",_id);
+    console.log("owner",owner);
     const { user } = useAuth();
     const navigate = useNavigate();
     const [likeCount, setLikeCount] = useState(likes);
@@ -47,7 +48,22 @@ export function Post({ _id, title, imgUrl, content, likes, likedByUser }: PostPr
         }
     };
 
+    const handleDelete = async () => {
+        if (!user || user.id !== owner) return;
+        
+        if (window.confirm('Are you sure you want to delete this post?')) {
+            try {
+                await postsApi.deletePost(_id);
+                // You might want to trigger a refresh of the post list or navigate away
+                navigate('/');
+            } catch (error) {
+                console.error("Error deleting post:", error);
+            }
+        }
+    };
+
     return (
+        
         <div className="card post-card shadow-sm">
             <img src={imgUrl} alt={title} className="card-img-top post-image" />
             <div className="card-body text-center">
@@ -58,6 +74,22 @@ export function Post({ _id, title, imgUrl, content, likes, likedByUser }: PostPr
                     <FaThumbsUp /> {likeCount} Likes
                 </button>
 
+                {user && user.id === owner && (
+                        <div className="btn-group">
+                            <button 
+                                className="btn btn-outline-primary"
+                                onClick={() => navigate(`/post/${_id}/edit`)}
+                            >
+                                <FaEdit /> Edit
+                            </button>
+                            <button 
+                                className="btn btn-outline-danger"
+                                onClick={handleDelete}
+                            >
+                                <FaTrash /> Delete
+                            </button>
+                        </div>
+                    )}
                 <button className="btn btn-outline-secondary btn-sm mt-3" onClick={() => setShowCommentsPreview(!showCommentsPreview)}>
                     {showCommentsPreview ? "Hide Comments Preview" : "View Comments Preview"}
                 </button>
