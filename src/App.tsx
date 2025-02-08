@@ -7,6 +7,8 @@ import PostCommentsPage from "./components/PostCommentsPage";
 import Header from "./components/Header";
 import LoginRegister from "./components/LoginRegister";
 import CreateNewPost from "./components/createNewPost.tsx";
+import UserProfile from "./components/userProfile.tsx";
+import EditPost from "./components/EditPost.tsx"
 import { AuthProvider, useAuth } from "./components/AuthContext.tsx";
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
@@ -24,6 +26,8 @@ function App() {
                     <Route path="/login" element={<LoginRegister />} />
                     <Route path="/post/:postId/comments" element={<ProtectedRoute><PostCommentsPage /></ProtectedRoute>} /> {/* ✅ תגובות דורשות התחברות */}
                     <Route path="/createNewPost" element={<ProtectedRoute><CreateNewPost /></ProtectedRoute>} /> {/* ✅ יצירת פוסט דורש התחברות */}
+                    <Route path="/userProfile" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} /> {/* ✅ מסך פרטי משתמש דורש התחברות */}      
+                    <Route path="/post/:postId/edit" element={<ProtectedRoute><EditPost /></ProtectedRoute>} /> {/* ✅ מסך עריכה דורש התחברות */}                  
                 </Routes>
             </AuthProvider>
         </Router>

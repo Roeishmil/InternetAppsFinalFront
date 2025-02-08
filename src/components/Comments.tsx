@@ -27,6 +27,7 @@ const Comments: React.FC<CommentsProps> = ({ postId, preview = false }) => {
         const fetchComments = async () => {
             try {
                 const data: Comment[] = await commentsApi.getByPostId(postId) as Comment[];
+                console.log('comments',data);
                 setComments(data);
             } catch (error) {
                 console.error("Failed to load comments:", error);
@@ -43,10 +44,10 @@ const Comments: React.FC<CommentsProps> = ({ postId, preview = false }) => {
         }
         if (!newComment.trim()) return;
 
-        const newCommentObj = { id: Date.now(), text: newComment, user: user.name };
+        const newCommentObj = { id: Date.now(), text: newComment, user: user.username };
         setComments([...comments, newCommentObj]);
         setNewComment("");
-        await commentsApi.create(postId, user.id, newComment);
+        await commentsApi.create( postId, user.id, newComment);
     };
 
     return (
