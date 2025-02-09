@@ -12,30 +12,31 @@ export interface PostProps {
     owner: string;
     imgUrl: string;
     content: string;
-    likes: number;
+    likes?: number;  // Make likes optional
     likedByUser: boolean;
 }
 
-export function Post({ _id, title, owner, imgUrl, content, likes, likedByUser }: PostProps) {
+export function Post({ _id, title, owner, imgUrl, content, likes = 0, likedByUser }: PostProps) {  // Provide default value
     const { user } = useAuth();
     const navigate = useNavigate();
-    const [likeCount, setLikeCount] = useState(likes);
+    const [likeCount, setLikeCount] = useState(Number(likes) || 0);  // Ensure numeric value
     const [isLiked, setIsLiked] = useState(likedByUser);
     const [showCommentsPreview, setShowCommentsPreview] = useState(false);
 
+    // Rest of the Post component remains the same
     const handleLike = async () => {
         if (!user) {
             alert("You must be logged in to like posts!");
             return;
         }
         try {
+            const newLikeCount = isLiked ? likeCount - 1 : likeCount + 1;
             if (isLiked) {
                 await postsApi.unlikePost(_id, user.id);
-                setLikeCount(prev => prev - 1);
             } else {
                 await postsApi.likePost(_id, user.id);
-                setLikeCount(prev => prev + 1);
             }
+            setLikeCount(newLikeCount);
             setIsLiked(!isLiked);
         } catch (error) {
             console.error("Error updating like:", error);
@@ -43,10 +44,19 @@ export function Post({ _id, title, owner, imgUrl, content, likes, likedByUser }:
     };
 
     const handleDelete = async () => {
-        if (!user || user.id !== owner) return;
+        if (!user) {
+            alert("Please log in to delete posts");
+            navigate('/login');
+            return;
+        }
+        if (user.id !== owner) {
+            alert("You can only delete your own posts");
+            return;
+        }
         if (window.confirm('Are you sure you want to delete this post?')) {
             try {
                 await postsApi.deletePost(_id);
+                window.dispatchEvent(new CustomEvent('postDeleted', { detail: _id }));
                 navigate('/');
             } catch (error) {
                 console.error("Error deleting post:", error);

@@ -10,6 +10,7 @@ import CreateNewPost from "./components/createNewPost.tsx";
 import UserProfile from "./components/userProfile.tsx";
 import EditPost from "./components/EditPost.tsx";
 import { AuthProvider, useAuth } from "./components/AuthContext.tsx";
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
     const { user } = useAuth();
