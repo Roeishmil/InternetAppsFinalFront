@@ -19,6 +19,10 @@ const LoginRegister = () => {
         }
     };
 
+    const handleLogin = () => {
+        window.location.href = "http://localhost:3000/auth/google";
+      };
+
     return (
         <div className="container d-flex justify-content-center align-items-center vh-100">
             <div className="card p-4 shadow-lg w-100" style={{ maxWidth: "400px" }}>
@@ -59,7 +63,7 @@ const LoginRegister = () => {
                 <button className="btn btn-link text-center" onClick={() => setIsRegistering(!isRegistering)}>
                     {isRegistering ? "Already have an account? Login" : "New here? Register"}
                 </button>
-                
+                <button onClick={handleLogin}>Login with Google</button>
                 <button className="btn btn-secondary w-100 mt-2 rounded-pill" onClick={() => navigate("/")}>Go back</button>
             </div>
         </div>
