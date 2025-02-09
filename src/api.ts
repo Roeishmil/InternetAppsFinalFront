@@ -9,6 +9,41 @@ export const api = axios.create({
      }
  });
 
+
+// Add auth token to all requests
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
+// Handle token refresh on 401 errors
+api.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        const originalRequest = error.config;
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
+            try {
+                const refreshToken = localStorage.getItem("refreshToken");
+                const response = await axios.post("http://localhost:3000/auth/refresh", { refreshToken });
+                const { accessToken } = response.data;
+                localStorage.setItem("accessToken", accessToken);
+                originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+                return api(originalRequest);
+            } catch (err) {
+                localStorage.removeItem("accessToken");
+                localStorage.removeItem("refreshToken");
+                window.location.href = "/login";
+                return Promise.reject(err);
+            }
+        }
+        return Promise.reject(error);
+    }
+); 
+
 export const postsApi = {
     getAll: async () => {
         const response = await api.get('/posts');
@@ -19,10 +54,9 @@ export const postsApi = {
         return response.data;
     },
 
-    create: async (post: PostProps) => {
-        console.log("Post is" ,post);
-        const response = await api.post('/posts', post,{
-            headers:{
+    create: async (post: FormData) => {
+        const response = await api.post('/posts', post, {
+            headers: {
                 "Content-Type": "multipart/form-data",
             },
         });
@@ -36,22 +70,33 @@ export const postsApi = {
         });
         return response.data;
     },
-
     deletePost: async (postId: string) => {
         const response = await api.delete(`/posts/${postId}`);
         return response.data;
     },
+
     likePost: async (postId: string, userId: string) => {
-        const response = await api.post(`/posts/${postId}/like`, { userId });
-        return response
+        const response = await api.post(`/likes`, {
+            userId,
+            objectId: postId,
+            objType: 'post'
+        });
+        return response.data;
     },
     unlikePost: async (postId: string, userId: string) => {
-        const response = await api.post(`/posts/${postId}/delete`, { userId });
+        const response = await api.delete(`/likes`, {
+            data: {
+                userId,
+                objectId: postId,
+                objType: 'post'
+            }
+        });
         return response.data;
+    },
+    checkLike: async (postId: string, userId: string) => {
+        const response = await api.get(`/likes/check?userId=${userId}&objectId=${postId}&objType=post`);
+        return response.data.hasLiked;
     }
-    // getUrl: (){
-    //     return api.b
-    // }
 };
 
 export const commentsApi = {

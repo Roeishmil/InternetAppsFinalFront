@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../components/AuthContext';
 import { commentsApi } from '../api';
 import { FaEdit, FaTrash } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 interface CommentProps {
@@ -23,6 +25,7 @@ const Comments: React.FC<CommentProps> = ({ postId, preview = false }) => {
     const [editingComment, setEditingComment] = useState<string | null>(null);
     const [editText, setEditText] = useState('');
     const { user } = useAuth();
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchComments();
@@ -30,8 +33,36 @@ const Comments: React.FC<CommentProps> = ({ postId, preview = false }) => {
 
     const fetchComments = async () => {
         try {
-            const fetchedComments = await commentsApi.getByPostId(postId) as Comment[];
-            setComments(preview ? fetchedComments.slice(0, 3) : fetchedComments);
+            const fetchedComments = await commentsApi.getByPostId(postId);
+            // Transform the comments to handle different response structures
+            const transformedComments = fetchedComments.map((comment: any) => {
+                console.log('comment data is ',comment);
+                let ownerName = 'Unknown User';
+                
+                // Handle different possible response structures
+                if (typeof comment.owner === 'object' && comment.owner !== null) {
+                    // If owner is an object with username
+                    ownerName = comment.owner||comment.owner.username || comment.ownerName || 'Unknown User';
+                    return {
+                        ...comment,
+                        owner: comment.owner._id || comment.owner,
+                        ownerName
+                    };
+                } else if (comment.ownerName) {
+                    // If ownerName is directly available
+                    return {
+                        ...comment,
+                        ownerName: comment.ownerName
+                    };
+                }
+                
+                return {
+                    ...comment,
+                    ownerName
+                };
+            });
+            
+            setComments(preview ? transformedComments.slice(0, 3) : transformedComments);
         } catch (error) {
             console.error('Error fetching comments:', error);
         }
@@ -40,15 +71,16 @@ const Comments: React.FC<CommentProps> = ({ postId, preview = false }) => {
     const handleSubmitComment = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!user) {
-            alert('You must be logged in to comment!');
+            alert("Please log in to comment");
+            navigate('/login');
             return;
         }
         if (!newComment.trim()) return;
 
         try {
-            await commentsApi.create(postId, user.id, newComment.trim());
+            const response = await commentsApi.create(postId, user.id, newComment.trim());
             setNewComment('');
-            fetchComments();
+            fetchComments(); // Refresh comments to show the new one with correct owner name
         } catch (error) {
             console.error('Error creating comment:', error);
         }
