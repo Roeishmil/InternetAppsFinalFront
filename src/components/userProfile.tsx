@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Mail, Lock, Camera, Eye, EyeOff } from 'lucide-react';
 import { userProfileApi, UserProfileI } from '../api';
+import PostList from './PostList'; // Import PostList component
+
 
 const UserProfile = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -18,6 +20,9 @@ const UserProfile = () => {
         password: '',
         imgUrl: ''
     });
+
+    const [showUserPosts, setShowUserPosts] = useState(false);
+
 
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -284,6 +289,24 @@ const UserProfile = () => {
                                         <p className="text-secondary mb-0">{showPassword ? userData.password : '••••••••'}</p>
                                     </div>
                                 </div>
+                                                            {/* New section for viewing user posts */}
+                            <div className="card-footer bg-white p-3">
+                                <div className="d-flex justify-content-center">
+                                    <button 
+                                        className="btn btn-outline-primary" 
+                                        onClick={() => setShowUserPosts(!showUserPosts)}
+                                    >
+                                        {showUserPosts ? 'Hide My Posts' : 'View My Posts'}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* User Posts Section */}
+                            {showUserPosts && (
+                                <div className="card-body p-0">
+                                    <PostList initialFilterMode="userPostsOnly" />
+                                </div>
+                            )}
                             </div>
                         </div>
                     </div>

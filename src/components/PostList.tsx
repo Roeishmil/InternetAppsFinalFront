@@ -7,13 +7,17 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../components/AuthContext';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const PostList: React.FC = () => {
+interface PostListProps {
+    initialFilterMode?: 'userPostsOnly' | 'likedPostsOnly' | 'none';
+}
+
+const PostList: React.FC<PostListProps> = ({ initialFilterMode = 'none' }) => {
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const [posts, setPosts] = useState<PostProps[]>([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-    const [showUserPostsOnly, setShowUserPostsOnly] = useState(false);
-    const [showLikedPostsOnly, setShowLikedPostsOnly] = useState(false);
+    const [showUserPostsOnly, setShowUserPostsOnly] = useState(initialFilterMode === 'userPostsOnly');
+    const [showLikedPostsOnly, setShowLikedPostsOnly] = useState(initialFilterMode === 'likedPostsOnly');
     const { user } = useAuth();
 
     const fetchPosts = async () => {
@@ -29,7 +33,7 @@ const PostList: React.FC = () => {
                         return { 
                             ...post, 
                             likedByUser: hasLiked,
-                            likes: likeCount // Maintain compatibility with existing 'likes' property
+                            likes: likeCount
                         };
                     })
                 );
@@ -114,51 +118,53 @@ const PostList: React.FC = () => {
 
     return (
         <div className="container my-5">
-            <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap">
-                <h2 className="fw-bold text-primary">📸 Latest Posts</h2>
-                <div className="d-flex gap-2 align-items-center">
-                    {user && (
-                        <>
-                            <div className="form-check me-3">
-                                <input
-                                    className="form-check-input"
-                                    type="checkbox"
-                                    id="userPostsFilter"
-                                    checked={showUserPostsOnly}
-                                    onChange={(e) => {
-                                        setShowUserPostsOnly(e.target.checked);
-                                        if (e.target.checked) setShowLikedPostsOnly(false);
-                                    }}
-                                />
-                                <label className="form-check-label" htmlFor="userPostsFilter">
-                                    Show My Posts Only
-                                </label>
-                            </div>
-                            <div className="form-check me-3">
-                                <input
-                                    className="form-check-input"
-                                    type="checkbox"
-                                    id="likedPostsFilter"
-                                    checked={showLikedPostsOnly}
-                                    onChange={(e) => {
-                                        setShowLikedPostsOnly(e.target.checked);
-                                        if (e.target.checked) setShowUserPostsOnly(false);
-                                    }}
-                                />
-                                <label className="form-check-label" htmlFor="likedPostsFilter">
-                                    Show Liked Posts Only
-                                </label>
-                            </div>
-                        </>
-                    )}
-                    <button onClick={handleSort} className="btn btn-outline-primary d-flex align-items-center">
-                        Sort by Rating {sortOrder === 'asc' ? <FaSortAmountUp className="ms-2" /> : <FaSortAmountDown className="ms-2" />}
-                    </button>
-                    <button className="btn btn-success" onClick={() => navigate(`/createNewPost`)}>
-                        Create a New Post
-                    </button>
+            {initialFilterMode === 'none' && (
+                <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+                    <h2 className="fw-bold text-primary">📸 Latest Posts</h2>
+                    <div className="d-flex gap-2 align-items-center">
+                        {user && (
+                            <>
+                                <div className="form-check me-3">
+                                    <input
+                                        className="form-check-input"
+                                        type="checkbox"
+                                        id="userPostsFilter"
+                                        checked={showUserPostsOnly}
+                                        onChange={(e) => {
+                                            setShowUserPostsOnly(e.target.checked);
+                                            if (e.target.checked) setShowLikedPostsOnly(false);
+                                        }}
+                                    />
+                                    <label className="form-check-label" htmlFor="userPostsFilter">
+                                        Show My Posts Only
+                                    </label>
+                                </div>
+                                <div className="form-check me-3">
+                                    <input
+                                        className="form-check-input"
+                                        type="checkbox"
+                                        id="likedPostsFilter"
+                                        checked={showLikedPostsOnly}
+                                        onChange={(e) => {
+                                            setShowLikedPostsOnly(e.target.checked);
+                                            if (e.target.checked) setShowUserPostsOnly(false);
+                                        }}
+                                    />
+                                    <label className="form-check-label" htmlFor="likedPostsFilter">
+                                        Show Liked Posts Only
+                                    </label>
+                                </div>
+                            </>
+                        )}
+                        <button onClick={handleSort} className="btn btn-outline-primary d-flex align-items-center">
+                            Sort by Rating {sortOrder === 'asc' ? <FaSortAmountUp className="ms-2" /> : <FaSortAmountDown className="ms-2" />}
+                        </button>
+                        <button className="btn btn-success" onClick={() => navigate(`/createNewPost`)}>
+                            Create a New Post
+                        </button>
+                    </div>
                 </div>
-            </div>
+            )}
 
             <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
                 {filteredPosts.map((post) => (
