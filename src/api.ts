@@ -83,6 +83,7 @@ export const postsApi = {
         });
         return response.data;
     },
+
     unlikePost: async (postId: string, userId: string) => {
         const response = await api.delete(`/likes`, {
             data: {
@@ -93,9 +94,20 @@ export const postsApi = {
         });
         return response.data;
     },
+
     checkLike: async (postId: string, userId: string) => {
         const response = await api.get(`/likes/check?userId=${userId}&objectId=${postId}&objType=post`);
         return response.data.hasLiked;
+    },
+
+    getLikeCount: async (postId: string) => {
+        const response = await api.get(`/likes/${postId}/post/count`);
+        return response.data.count;
+    },
+
+    getUserLikedPosts: async (userId: string) => {
+        const response = await api.get(`/likes/user/${userId}/posts`);
+        return response.data;
     }
 };
 
@@ -108,10 +120,14 @@ export const commentsApi = {
         const response = await api.get(`/comments/${postId}`);
         return response.data;
     },
-    create: async (postId: string, userId: string, text: string) => {
+    getUsernameByOwnerId: async (id:string) => {
+        const response = await api.get(`/users/${id}`);
+        return response.data;
+    },
+    create: async (postId: string, userId: string, text: string, ownerName: string) => {
         const owner = userId;
         const comment = text;
-        const response = await api.post(`/comments`, {comment, owner,postId });
+        const response = await api.post(`/comments`, {comment, owner,postId,ownerName });
         return response.data;
     },
     delete: async ( commentId: string) => {

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaThumbsUp, FaEdit, FaTrash } from 'react-icons/fa';
-import { useAuth } from '../components/AuthContext.tsx';
+import { useAuth } from '../components/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Comments from './Comments';
 import { postsApi } from '../api';
@@ -12,32 +12,52 @@ export interface PostProps {
     owner: string;
     imgUrl: string;
     content: string;
-    likes?: number;  // Make likes optional
+    likes?: number;
     likedByUser: boolean;
 }
 
-export function Post({ _id, title, owner, imgUrl, content, likes = 0, likedByUser }: PostProps) {  // Provide default value
+export function Post({ _id, title, owner, imgUrl, content, likes = 0, likedByUser: initialLikedByUser = false }: PostProps) {
     const { user } = useAuth();
     const navigate = useNavigate();
-    const [likeCount, setLikeCount] = useState(Number(likes) || 0);  // Ensure numeric value
-    const [isLiked, setIsLiked] = useState(likedByUser);
+    const [currentLikeCount, setCurrentLikeCount] = useState(likes);
+    const [isLiked, setIsLiked] = useState(initialLikedByUser);
     const [showCommentsPreview, setShowCommentsPreview] = useState(false);
 
-    // Rest of the Post component remains the same
+    useEffect(() => {
+        // Check if user has liked this post when component mounts
+        const checkLikeStatus = async () => {
+            if (user) {
+                try {
+                    const hasLiked = await postsApi.checkLike(_id, user.id);
+                    setIsLiked(hasLiked);
+                } catch (error) {
+                    console.error("Error checking like status:", error);
+                }
+            }
+        };
+        
+        checkLikeStatus();
+    }, [_id, user]);
+
     const handleLike = async () => {
         if (!user) {
             alert("You must be logged in to like posts!");
             return;
         }
+
         try {
-            const newLikeCount = isLiked ? likeCount - 1 : likeCount + 1;
             if (isLiked) {
                 await postsApi.unlikePost(_id, user.id);
+                setCurrentLikeCount(prev => prev - 1);
             } else {
                 await postsApi.likePost(_id, user.id);
+                setCurrentLikeCount(prev => prev + 1);
             }
-            setLikeCount(newLikeCount);
             setIsLiked(!isLiked);
+            // Dispatch custom event to update PostList if needed
+            window.dispatchEvent(new CustomEvent('likeUpdated', { 
+                detail: { postId: _id, liked: !isLiked } 
+            }));
         } catch (error) {
             console.error("Error updating like:", error);
         }
@@ -66,24 +86,39 @@ export function Post({ _id, title, owner, imgUrl, content, likes = 0, likedByUse
 
     return (
         <div className="card post-card shadow-lg mx-auto mt-4" style={{ maxWidth: '600px' }}>
-            <img src={imgUrl} alt={title} className="card-img-top" style={{ maxHeight: '300px', objectFit: 'cover' }} />
+            <img 
+                src={imgUrl} 
+                alt={title} 
+                className="card-img-top" 
+                style={{ maxHeight: '300px', objectFit: 'cover' }} 
+                onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = 'path/to/fallback/image.jpg'; // Add your fallback image path
+                }}
+            />
             <div className="card-body">
                 <h5 className="card-title text-center fw-bold">{title}</h5>
                 <p className="card-text text-muted text-center">{content}</p>
                 
                 <div className="d-flex justify-content-between align-items-center mt-3">
                     <button 
-                        className={`btn ${isLiked ? 'btn-danger' : 'btn-outline-primary'} d-flex align-items-center`} 
+                        className={`btn ${isLiked ? 'btn-primary' : 'btn-outline-primary'} d-flex align-items-center`} 
                         onClick={handleLike}
                     >
-                        <FaThumbsUp className="me-2" /> {likeCount} Likes
+                        <FaThumbsUp className="me-2" /> {currentLikeCount} Likes
                     </button>
                     {user && user.id === owner && (
                         <div className="btn-group">
-                            <button className="btn btn-outline-primary" onClick={() => navigate(`/post/${_id}/edit`)}>
+                            <button 
+                                className="btn btn-outline-primary" 
+                                onClick={() => navigate(`/post/${_id}/edit`)}
+                            >
                                 <FaEdit /> Edit
                             </button>
-                            <button className="btn btn-outline-danger" onClick={handleDelete}>
+                            <button 
+                                className="btn btn-outline-danger" 
+                                onClick={handleDelete}
+                            >
                                 <FaTrash /> Delete
                             </button>
                         </div>
@@ -91,7 +126,10 @@ export function Post({ _id, title, owner, imgUrl, content, likes = 0, likedByUse
                 </div>
                 
                 <div className="text-center mt-3">
-                    <button className="btn btn-outline-secondary btn-sm" onClick={() => setShowCommentsPreview(!showCommentsPreview)}>
+                    <button 
+                        className="btn btn-outline-secondary btn-sm" 
+                        onClick={() => setShowCommentsPreview(!showCommentsPreview)}
+                    >
                         {showCommentsPreview ? "Hide Comments" : "View Comments"}
                     </button>
                 </div>
@@ -99,7 +137,10 @@ export function Post({ _id, title, owner, imgUrl, content, likes = 0, likedByUse
                 {showCommentsPreview && (
                     <div className="comment-preview p-3 mt-3 border rounded bg-light">
                         <Comments postId={_id} preview={true} />
-                        <button className="btn btn-primary btn-sm mt-2 w-100" onClick={() => navigate(`/post/${_id}/comments`)}>
+                        <button 
+                            className="btn btn-primary btn-sm mt-2 w-100" 
+                            onClick={() => navigate(`/post/${_id}/comments`)}
+                        >
                             View All Comments
                         </button>
                     </div>
