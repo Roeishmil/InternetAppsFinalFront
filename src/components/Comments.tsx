@@ -34,32 +34,28 @@ const Comments: React.FC<CommentProps> = ({ postId, preview = false }) => {
     const fetchComments = async () => {
         try {
             const fetchedComments = await commentsApi.getByPostId(postId);
-            // Transform the comments to handle different response structures
+            // Transform the comments
             const transformedComments = fetchedComments.map((comment: any) => {
-                console.log('comment data is ',comment);
                 let ownerName = 'Unknown User';
                 
-                // Handle different possible response structures
                 if (typeof comment.owner === 'object' && comment.owner !== null) {
-                    // If owner is an object with username
-                    ownerName = comment.owner||comment.owner.username || comment.ownerName || 'Unknown User';
+                    ownerName = comment.owner.username || comment.ownerName || 'Unknown User';
                     return {
-                        ...comment,
+                        _id: comment._id,
+                        postId: comment.postId,
                         owner: comment.owner._id || comment.owner,
+                        comment: comment.comment,
                         ownerName
                     };
-                } else if (comment.ownerName) {
-                    // If ownerName is directly available
+                } else {
                     return {
-                        ...comment,
-                        ownerName: comment.ownerName
+                        _id: comment._id,
+                        postId: comment.postId,
+                        owner: comment.owner,
+                        comment: comment.comment,
+                        ownerName: comment.ownerName || ownerName
                     };
                 }
-                
-                return {
-                    ...comment,
-                    ownerName
-                };
             });
             
             setComments(preview ? transformedComments.slice(0, 3) : transformedComments);
@@ -78,7 +74,7 @@ const Comments: React.FC<CommentProps> = ({ postId, preview = false }) => {
         if (!newComment.trim()) return;
 
         try {
-            const response = await commentsApi.create(postId, user.id, newComment.trim());
+            const response = await commentsApi.create(postId, user.id, newComment.trim(),user.username);
             setNewComment('');
             fetchComments(); // Refresh comments to show the new one with correct owner name
         } catch (error) {
