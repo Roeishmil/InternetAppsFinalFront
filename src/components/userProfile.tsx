@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Mail, Lock, Camera, Eye, EyeOff } from 'lucide-react';
-import { userProfileApi, UserProfileI } from '../api';
-import PostList from './PostList'; // Import PostList component
+import { Mail, Lock, Camera } from 'lucide-react';
+import { userProfileApi, UserProfileI, ProfileImageUpdate } from '../api';
+import PostList from './PostList';
 
-
-const UserProfile = () => {
-    const [showPassword, setShowPassword] = useState(false);
+export const UserProfile = () => {
+    const [showPassword] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [isImageLoading, setIsImageLoading] = useState(false);
     const [tempImgUrl, setTempImgUrl] = useState<string | null>(null);
@@ -16,13 +15,13 @@ const UserProfile = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [userData, setUserData] = useState<UserProfileI>({
         username: '',
+        id: '',
         email: '',
         password: '',
         imgUrl: ''
     });
 
     const [showUserPosts, setShowUserPosts] = useState(false);
-
 
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -34,7 +33,7 @@ const UserProfile = () => {
     const fetchUserData = async (username: string) => {
         try {
             setIsLoading(true);
-            const data = await userProfileApi.getByUsername(username);
+            const data: UserProfileI = await userProfileApi.getByUsername(username) as UserProfileI;
             data.password = JSON.parse(localStorage.getItem("user") || "{}").password;
             setUserData(data);
             setOriginalImage(data.imgUrl);
@@ -50,7 +49,6 @@ const UserProfile = () => {
         const newEmail = e.target.value;
         setUserData(prev => ({ ...prev, email: newEmail }));
     };
-    
 
     const handleUpdateEmail = async (newEmail: string) => {
         try {
@@ -58,13 +56,8 @@ const UserProfile = () => {
             const user = JSON.parse(localStorage.getItem("user") || "{}");
             const updatedUser = { ...user, email: newEmail };
     
-            // Ensure this API endpoint exists and handles email updates
             await userProfileApi.updateEmail(user.username, newEmail);
-    
-            // Update local storage with the new email
             localStorage.setItem("user", JSON.stringify(updatedUser));
-    
-            // Reflect the change in the component's state
             setUserData(prev => ({ ...prev, email: newEmail }));
             setIsEditing(false);
         } catch (error) {
@@ -73,9 +66,6 @@ const UserProfile = () => {
             setIsLoading(false);
         }
     };
-    
-    
-    
 
     const handleImageClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -103,13 +93,14 @@ const UserProfile = () => {
             const username = JSON.parse(localStorage.getItem("user") || "{}").username;
             const userId = JSON.parse(localStorage.getItem("user") || "{}").id;
             
-            const formData = new FormData();
-            formData.append('username', username);
-            formData.append('id', userId);
-            formData.append('file', selectedFile);
-            formData.append('imgUrl', selectedFile.name);
+            const imageUpdateData: ProfileImageUpdate = {
+                username,
+                id: userId,
+                file: selectedFile,
+                imgUrl: selectedFile.name
+            };
             
-            await userProfileApi.updateProfileImage(formData);
+            await userProfileApi.updateProfileImage(imageUpdateData);
             await fetchUserData(username);
             setIsEditingImage(false);
             setSelectedFile(null);

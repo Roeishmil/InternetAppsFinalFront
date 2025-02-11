@@ -16,7 +16,7 @@ const EditPost: React.FC = () => {
     useEffect(() => {
         const fetchPost = async () => {
             try {
-                const fetchedPost = await postsApi.getById(postId!);
+                const fetchedPost = await postsApi.getById(postId!) as PostProps;
                 if (!user || user.id !== fetchedPost.owner) {
                     navigate('/');
                     return;
