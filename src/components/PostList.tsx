@@ -69,6 +69,7 @@ const PostList: React.FC<PostListProps> = ({ initialFilterMode = 'none' }) => {
         const handleLikeUpdated = (event: CustomEvent) => {
             setPosts(prevPosts => prevPosts.map(post => {
                 if (post._id === event.detail.postId) {
+                    if (!post.likes){ post.likes = 0; }
                     return {
                         ...post,
                         likedByUser: event.detail.liked,

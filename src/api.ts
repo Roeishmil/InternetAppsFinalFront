@@ -1,5 +1,4 @@
-import { PostProps } from "./components/Post";
-import axios, { get } from "axios";
+import axios from "axios";
 
 
 export const api = axios.create({
@@ -14,6 +13,9 @@ export const api = axios.create({
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem("accessToken");
     if (token) {
+        if (!config.headers) {
+            config.headers = {};
+        }
         config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -29,7 +31,7 @@ api.interceptors.response.use(
             try {
                 const refreshToken = localStorage.getItem("refreshToken");
                 const response = await axios.post("http://localhost:3000/auth/refresh", { refreshToken });
-                const { accessToken } = response.data;
+                const { accessToken } = response.data as { accessToken: string };
                 localStorage.setItem("accessToken", accessToken);
                 originalRequest.headers.Authorization = `Bearer ${accessToken}`;
                 return api(originalRequest);
@@ -86,22 +88,25 @@ export const postsApi = {
 
     unlikePost: async (postId: string, userId: string) => {
         const response = await api.delete(`/likes`, {
+            headers: {
+                'Content-Type': 'application/json'
+            },
             data: {
                 userId,
                 objectId: postId,
                 objType: 'post'
             }
-        });
+        } as any); // Type assertion to bypass TypeScript error
         return response.data;
     },
 
     checkLike: async (postId: string, userId: string) => {
         const response = await api.get(`/likes/check?userId=${userId}&objectId=${postId}&objType=post`);
-        return response.data.hasLiked;
+        return (response.data as { hasLiked: boolean }).hasLiked;
     },
 
     getLikeCount: async (postId: string) => {
-        const response = await api.get(`/likes/${postId}/post/count`);
+        const response = await api.get<{ count: number }>(`/likes/${postId}/post/count`);
         return response.data.count;
     },
 
@@ -143,10 +148,18 @@ export const commentsApi = {
 // Types
 export interface UserProfileI {
     username: string;
+    id: string;
     email: string;
     password: string;
-    imgUrl: string,
+    imgUrl: string;
     refreshToken?: string[];
+}
+
+export interface ProfileImageUpdate {
+    username: string;
+    id: string;
+    file: File;
+    imgUrl: string;
 }
 
 export const userProfileApi = {
@@ -174,15 +187,19 @@ export const userProfileApi = {
         const response = await api.delete(`/users/${username}`);
         return response.data;
     },
-    updateProfileImage: async (req: UserProfileI) => {
-        console.log("Image is" ,req);
+
+    updateProfileImage: async (data: ProfileImageUpdate) => {
+        const formData = new FormData();
+        formData.append('username', data.username);
+        formData.append('id', data.id);
+        formData.append('file', data.file);
+        formData.append('imgUrl', data.imgUrl);
         
-        const response = await api.post(`/users/${req.username}`, req, {
+        const response = await api.post(`/users/${data.username}`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
         });
-        console.log('response',response);
         return response.data;
     }
 };

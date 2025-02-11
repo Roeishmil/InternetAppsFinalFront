@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./styles/theme.css";
 import "./styles/Header.css";
 import "./styles/Comments.css";
@@ -10,11 +10,9 @@ import CreateNewPost from "./components/createNewPost.tsx";
 import UserProfile from "./components/userProfile.tsx";
 import EditPost from "./components/EditPost.tsx";
 import { AuthProvider, useAuth } from "./components/AuthContext.tsx";
-import { GoogleOAuthProvider } from '@react-oauth/google';
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
     const { user } = useAuth();
-    const location = useLocation();
     
     return user ? children : null;
 }

@@ -24,7 +24,7 @@ const Header = () => {
                                         className="nav-link btn btn-link text-white fw-semibold" 
                                         onClick={() => navigate("/userProfile")}
                                     >
-                                        👤 {user.name}
+                                        👤 {user.username}
                                     </button>
                                 </li>
                                 <li className="nav-item">

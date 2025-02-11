@@ -35,7 +35,7 @@ const Comments: React.FC<CommentProps> = ({ postId, preview = false }) => {
         try {
             const fetchedComments = await commentsApi.getByPostId(postId);
             // Transform the comments
-            const transformedComments = fetchedComments.map((comment: any) => {
+            const transformedComments = (fetchedComments as Comment[]).map((comment: any) => {
                 let ownerName = 'Unknown User';
                 
                 if (typeof comment.owner === 'object' && comment.owner !== null) {
@@ -74,7 +74,7 @@ const Comments: React.FC<CommentProps> = ({ postId, preview = false }) => {
         if (!newComment.trim()) return;
 
         try {
-            const response = await commentsApi.create(postId, user.id, newComment.trim(),user.username);
+            await commentsApi.create(postId, user.id, newComment.trim(),user.username);
             setNewComment('');
             fetchComments(); // Refresh comments to show the new one with correct owner name
         } catch (error) {

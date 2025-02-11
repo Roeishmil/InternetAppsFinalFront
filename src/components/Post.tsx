@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { FaThumbsUp, FaEdit, FaTrash } from 'react-icons/fa';
 import { useAuth } from '../components/AuthContext';
 import { useNavigate } from 'react-router-dom';
