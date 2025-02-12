@@ -43,9 +43,9 @@ const CreateNewPost: React.FC = () => {
 
     setIsGenerating(true);
     const userId = JSON.parse(localStorage.getItem("user") || "{}").id;
-
+    const backend_url = "https://10.10.246.59";
     try {
-      const response = await fetch('http://localhost:3000/api/askGPT', {
+      const response = await fetch(backend_url +'/api/askGPT', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

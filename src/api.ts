@@ -1,8 +1,8 @@
 import axios from "axios";
 
-
+const backend_url = "https://10.10.246.59";
 export const api = axios.create({
-    baseURL: "http://localhost:3000", 
+    baseURL: backend_url, 
     headers: {
         'Content-Type': 'application/json'
      }
@@ -30,7 +30,8 @@ api.interceptors.response.use(
             originalRequest._retry = true;
             try {
                 const refreshToken = localStorage.getItem("refreshToken");
-                const response = await axios.post("http://localhost:3000/auth/refresh", { refreshToken });
+                const backend_url = "https://10.10.246.59";
+                const response = await axios.post(backend_url + "/auth/refresh", { refreshToken });
                 const { accessToken } = response.data as { accessToken: string };
                 localStorage.setItem("accessToken", accessToken);
                 originalRequest.headers.Authorization = `Bearer ${accessToken}`;

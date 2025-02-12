@@ -2,7 +2,8 @@ import React, { createContext, ReactNode, useContext, useEffect, useState } from
 import axios from "axios";
 import { UserProfileI } from "../api.ts";
 
-const API_URL = "http://localhost:3000/auth";
+const backend_url = "https://10.10.246.59";
+const API_URL = backend_url + "/auth";
 
 interface AuthContextType {
     user: UserProfileI | null;

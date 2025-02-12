@@ -26,7 +26,6 @@ export const UserProfile = () => {
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         const username = user.username;
-        console.log('username is', username);
         fetchUserData(username);
     }, []);
 
@@ -37,7 +36,6 @@ export const UserProfile = () => {
             data.password = JSON.parse(localStorage.getItem("user") || "{}").password;
             setUserData(data);
             setOriginalImage(data.imgUrl);
-            console.log('User data is', data);
         } catch (error) {
             console.error('Error fetching user data:', error);
         } finally {
